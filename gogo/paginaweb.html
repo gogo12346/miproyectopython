@@ -1,56 +1,78 @@
+<!DOCTYPE html>
 <html>
 <head>
-<style type="text/css">
+  <style type="text/css">
     body {
-       color: rgb(0, 255, 191);
-       background-color: black;
+      color: rgb(0, 255, 191);
+      background-color: black;
     }
-    #section1{
-        font-size: 40px;
-        text-align: center;
-        background-image: url(https://cdn.pixabay.com/photo/2015/10/26/03/44/marble-1006628_1280.jpg);
+    #section1 {
+      font-size: 40px;
+      text-align: center;
+      background-image: url(https://cdn.pixabay.com/photo/2015/10/26/03/44/marble-1006628_1280.jpg);
     }
-    #proyecto {display: grid;
-    grid-template-columns: auto auto;
+    #proyectos {
+      display: grid;
+      grid-template-columns: auto auto;
+      gap: 10px;
+      padding: 20px;
     }
-    .proyecto1 img{
-        width: 100px;
-         height: 100px;
+    #proyectos img {
+      width: 100px;
+      height: 100px;
     }
-</style>
+  </style>
 </head>
-
 <body>      
-    <section id="section1">
-         <h1>hola como estan bienvenidos</h1>
-    </section>
-   <section id="proyecto">
-    <div class="proyecto1">
-          <p>la siguiente imagen es sobre un cantante que revoluciono la industria del trap</p>
-    <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSWC2kN3ozxdiRQbNo6bWoonvlM1cdwa5zm0A&s" alt="imagen duki"> 
-    </div>
-    <div class="proyecto1">
-    <p>duki</p>
-        <img src="https://cdn.pixabay.com/photo/2020/01/12/16/57/stadium-4760441_1280.jpg">
-    </div>
+  <section id="section1">
+    <h1>Hola, ¿cómo están? Bienvenidos</h1>
+  </section>
 
-   </section>
+  <section id="proyectos"></section>
 
+  <script>
+    const datos = [
+      {
+        img: "https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png",
+        desc: "Este es mi GitHub",
+        link: "https://github.com/gogo12346"
+      },
+      {
+        img: "http://www.xaviro.com/assets/img/skills/css.svg",
+        desc: "CSS",
+        link: "https://developer.mozilla.org/es/docs/Web/CSS"
+      },
+      {
+        img: "http://www.xaviro.com/assets/img/skills/js.svg",
+        desc: "JavaScript",
+        link: "https://developer.mozilla.org/es/docs/Web/JavaScript"
+      }
+    ];
+
+    let proyectos = document.querySelector('#proyectos');
+    proyectos.style.background = 'red';
+
+    function dinamico(src, desc, link) {
+      let div = document.createElement('div');
+
+      let a = document.createElement('a');
+      a.href = link;
+      a.target = '_blank';
+
+      let img = document.createElement('img');
+      img.src = src;
+
+      a.appendChild(img);
+      div.appendChild(a);
+
+      let p = document.createElement('p');
+      p.innerHTML = desc;
+      div.appendChild(p);
+
+      proyectos.appendChild(div);
+    }
+
+    datos.forEach(({ img, desc, link }) => dinamico(img, desc, link));
+  </script>
 </body>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-</html> 
+</html>
