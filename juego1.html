@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<!-- este es mi primer juego que hago espero que lo disfruten y avisen si algo esta mal -->
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Buscaminas</title>
+    <style>
+        body { text-align: center; font-family: Arial, sans-serif; }
+        table { margin: auto; border-collapse: collapse; }
+        td {
+            width: 30px; height: 30px; text-align: center;
+            border: 2px solid black; font-weight: bold;
+            cursor: pointer; background-color: lightgray;
+            position: relative;
+        }
+        .mine { background-color: red; }
+        .revealed { background-color: white; }
+        .flag { background-color: yellow; }
+        .win { background-color: lightgreen !important; }
+        .overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.8); color: white;
+            display: flex; justify-content: center; align-items: center;
+            font-size: 2em; display: none; flex-direction: column;
+        }
+        .overlay button { font-size: 1em; padding: 10px; margin-top: 10px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>Buscaminas</h1>
+    <label for="difficulty">Dificultad:</label>
+    <select id="difficulty" onchange="startGame()">
+        <option value="easy">Fácil (8x8, 10 minas)</option>
+        <option value="medium" selected>Normal (16x16, 40 minas)</option>
+        <option value="hard">Difícil (24x24, 99 minas)</option>
+    </select>
+    <button onclick="startGame()">Iniciar Juego</button>
+    <table id="board"></table>
+    <div id="gameMessage" class="overlay">
+        <span id="messageText"></span>
+        <button onclick="startGame()">Jugar de nuevo</button>
+    </div>
+    <script>
+        let rows, cols, mines, board = [], firstClick = true;
+        function setDifficulty() {
+            let difficulty = document.getElementById("difficulty").value;
+            if (difficulty === "easy") { rows = cols = 8; mines = 10; }
+            else if (difficulty === "medium") { rows = cols = 16; mines = 40; }
+            else { rows = cols = 24; mines = 99; }
+        }
+        function startGame() {
+            setDifficulty(); board = []; document.getElementById("board").innerHTML = "";
+            document.getElementById("gameMessage").style.display = "none"; firstClick = true;
+            createBoard();
+        }
+        function createBoard() {
+            const table = document.getElementById("board"); table.innerHTML = "";
+            for (let i = 0; i < rows; i++) {
+                let row = document.createElement("tr"); board[i] = [];
+                for (let j = 0; j < cols; j++) {
+                    let cell = document.createElement("td");
+                    cell.dataset.row = i; cell.dataset.col = j;
+                    cell.addEventListener("click", revealCell);
+                    cell.addEventListener("contextmenu", toggleFlag);
+                    row.appendChild(cell);
+                    board[i][j] = { mine: false, revealed: false, flagged: false, count: 0, element: cell };
+                }
+                table.appendChild(row);
+            }
+        }
+        function revealCell(event) {
+            let cell = event.target;
+            let row = parseInt(cell.dataset.row), col = parseInt(cell.dataset.col);
+            if (board[row][col].revealed || board[row][col].flagged) return;
+            if (firstClick) {
+                firstClick = false;
+                placeMines(row, col);
+            }
+            board[row][col].revealed = true;
+            cell.classList.add("revealed");
+            if (board[row][col].mine) {
+                cell.classList.add("mine");
+                showGameOver(false);
+                return;
+            }
+            cell.textContent = board[row][col].count > 0 ? board[row][col].count : "";
+            if (board[row][col].count === 0) revealAdjacentCells(row, col);
+            checkWin();
+        }
+        function revealAdjacentCells(row, col) {
+            for (let x = -1; x <= 1; x++) {
+                for (let y = -1; y <= 1; y++) {
+                    let ni = row + x, nj = col + y;
+                    if (ni >= 0 && ni < rows && nj >= 0 && nj < cols && !board[ni][nj].revealed) {
+                        revealCell({ target: board[ni][nj].element });
+                    }
+                }
+            }
+        }
+        function toggleFlag(event) {
+            event.preventDefault();
+            let cell = event.target;
+            let row = parseInt(cell.dataset.row), col = parseInt(cell.dataset.col);
+            if (board[row][col].revealed) return;
+            board[row][col].flagged = !board[row][col].flagged;
+            cell.classList.toggle("flag", board[row][col].flagged);
+        }
+        function placeMines(excludeRow, excludeCol) {
+            let placed = 0;
+            while (placed < mines) {
+                let r = Math.floor(Math.random() * rows);
+                let c = Math.floor(Math.random() * cols);
+                if (!board[r][c].mine && (r !== excludeRow || c !== excludeCol)) {
+                    board[r][c].mine = true; placed++;
+                }
+            }
+            countAdjacentMines();
+        }
+        function countAdjacentMines() {
+            for (let i = 0; i < rows; i++) {
+                for (let j = 0; j < cols; j++) {
+                    if (board[i][j].mine) continue;
+                    let count = 0;
+                    for (let x = -1; x <= 1; x++) {
+                        for (let y = -1; y <= 1; y++) {
+                            let ni = i + x, nj = j + y;
+                            if (ni >= 0 && ni < rows && nj >= 0 && nj < cols && board[ni][nj].mine) count++;
+                        }
+                    }
+                    board[i][j].count = count;
+                }
+            }
+        }
+        function checkWin() {
+            if (board.flat().every(cell => cell.revealed || cell.mine)) {
+                document.getElementById("gameMessage").style.display = "flex";
+                document.getElementById("messageText").textContent = "¡Ganaste!";
+                document.getElementById("board").classList.add("win");
+            }
+        }
+        function showGameOver(win) {
+            document.getElementById("gameMessage").style.display = "flex";
+            document.getElementById("messageText").textContent = win ? "¡Ganaste!" : "Game Over";
+        }
+        startGame();
+    </script>
+</body>
+</html>
